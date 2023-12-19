@@ -1,22 +1,4 @@
 ---
-title: "How to predict new samples with your TensorFlow / Keras model?"
-date: "2020-02-21"
-categories:
-  - "buffer"
-  - "deep-learning"
-  - "frameworks"
-tags:
-  - "keras"
-  - "machine-learning"
-  - "model"
-  - "neural-network"
-  - "neural-networks"
-  - "predict"
----
-
-
-**Update 03/Nov/2020:** fixed textual error.
-
 
 # File path
 filepath = './path_to_model'
@@ -119,10 +101,6 @@ filepath = './saved_model'
 save_model(model, filepath)
 ```
 
-In line with how saving Keras models works, it saves the `model` instance at the `filepath` (i.e. that folder) that you specified.
-
-Hooray! We now saved our trained model 🎉
-
 ### Loading
 
 Loading the model for future usage is really easy - it's a two-line addition:
@@ -135,10 +113,6 @@ model = load_model(filepath, compile = True)
 * * *
 
 ## Generating predictions
-
-With a loaded model, it's time to show you how to generate predictions with your Keras model! :)
-
-Firstly, let's add Matplotlib to our imports - which allows us to generate visualizations. Then, also add Numpy, for number processing:
 
 ```python
 import matplotlib.pyplot as plt
@@ -168,8 +142,6 @@ Here they are:
 - [![](images/dig_1.png)](https://www.machinecurve.com/wp-content/uploads/2020/02/dig_1.png)
     
 
-We then extend this code so that we can actually store the samples temporarily for prediction later:
-
 ```python
 # A few random samples
 use_samples = [5, 38, 3939, 27389]
@@ -184,8 +156,6 @@ for sample in use_samples:
   # Add sample to array for prediction
   samples_to_predict.append(input_train[sample])
 ```
-
-Then, before feeding them to the model, we convert our list into a Numpy array. This allows us to compute shape and allows Keras to handle the data more smoothly:
 
 ```python
 # Convert into Numpy array
