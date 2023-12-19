@@ -14,31 +14,10 @@ tags:
   - "predict"
 ---
 
-Training machine learning models can be awesome if they are accurate. However, you then also want to use them in production.
-
-But how to do so?
-
-The first step is often to allow the models to _generate new predictions_, for data that you - instead of Keras - feeds it.
-
-This blog zooms in on that particular topic. By providing a Keras based example using TensorFlow 2.0+, it will show you how to create a Keras model, train it, save it, load it and subsequently use it to generate new predictions. It's the first step of deploying your model into a production setting :)
-
-Are you ready? Let's go! 😎
-
-**Update 11/Jan/2021:** added quick example to the article.
 
 **Update 03/Nov/2020:** fixed textual error.
 
-* * *
 
-\[toc\]
-
-* * *
-
-## Example code: using model.predict() for predicting new samples
-
-With this example code, you can start using `model.predict()` straight away.
-
-```python
 # File path
 filepath = './path_to_model'
 
@@ -59,23 +38,7 @@ print(predictions)
 
 * * *
 
-## Today's Keras model
 
-Let's first take a look at the Keras model that we will be using today for showing you how to generate predictions for new data.
-
-It's an adaptation of the Convolutional Neural Network that we trained to demonstrate [how sparse categorical crossentropy loss works](https://www.machinecurve.com/index.php/2019/10/06/how-to-use-sparse-categorical-crossentropy-in-keras/). Today's one works for TensorFlow 2.0 and the integrated version of Keras; hence, I'd advise to use this variant instead of the traditional `keras` package.
-
-[![](images/dig_4-300x225.png)](https://www.machinecurve.com/wp-content/uploads/2020/02/dig_4.png)
-
-Now, I won't cover all the steps describing _how_ this model is built - take a look at the link above if you wish to understand this in more detail. However, very briefly:
-
-- The model loads data from the EMNIST Digits dataset, which contains many samples of digits 0 to 9. To do this, we use our [Extra Keras Datasets](https://www.machinecurve.com/index.php/2020/01/10/making-more-datasets-available-for-keras/) package.
-- It prepares the data by reshaping it (adding the number of channels, which Keras requires), casting the data into the `float32` type, and scaling.
-- It creates the ConvNet architecture: three convolutional blocks with [Max Pooling](https://www.machinecurve.com/index.php/2020/01/30/what-are-max-pooling-average-pooling-global-max-pooling-and-global-average-pooling/) for spatial hierarchy and [Dropout](https://www.machinecurve.com/index.php/2019/12/18/how-to-use-dropout-with-keras/) against overfitting. Using Flatten, and Dense layers that end with a [Softmax activation](https://www.machinecurve.com/index.php/2020/01/08/how-does-the-softmax-activation-function-work/), we get a multiclass probability distribution.
-- It compiles the model and fits the data.
-- Finally, it evaluates the model based on the test set.
-
-Here's the code - add it to a file called e.g. `keras-predictions.py`:
 
 ```python
 from tensorflow.keras.models import Sequential
@@ -142,16 +105,6 @@ print(f'Test loss: {score[0]} / Test accuracy: {score[1]}')
 
 ## Saving and loading the model
 
-If we want to generate new predictions for future data, it's important that we save the model. It really is: if you don't, you'd have to retrain the model every time you want to use it. This is bad for two reasons: if you have data at scale, this is a terrible process, and your models may no longer be comparable.
-
-Let's thus find a way to save our model!
-
-Fortunately, Keras offers a built-in facility for saving your models. Today, we do so using the new TensorFlow `SavedModel` approach. However, the former way of working is also still available. [Check out this post if you wish to check out saving models using both approaches in more detail](https://www.machinecurve.com/index.php/2020/02/14/how-to-save-and-load-a-model-with-keras/).
-
-### Saving
-
-Now, let's add some extra code to your model so that we can save and load the model :)
-
 First, add the `save_model` and `load_model` definitions to our imports - replace the line where you import `Sequential` with:
 
 ```python
@@ -179,10 +132,6 @@ Loading the model for future usage is really easy - it's a two-line addition:
 model = load_model(filepath, compile = True)
 ```
 
-Your model is now re-loaded from `filepath` and compiled automatically (i.e., the `model.compile` step is performed; you can also do this manually if you like).
-
-_Note that saving and loading your model during run-time of one Python file makes no sense at all: why would you write a model to your file system and load it in the same run? Yeah, you're right :)_ _The goal is however to make your model re-usable across many Python files. Hence, in any practical setting, you'd use `save_model` during the training run, while you'd use `load_model` in e.g. another script._
-
 * * *
 
 ## Generating predictions
@@ -195,8 +144,6 @@ Firstly, let's add Matplotlib to our imports - which allows us to generate visua
 import matplotlib.pyplot as plt
 import numpy as np
 ```
-
-Then, we'll add some code for visualizing the samples that we'll be using in today's post:
 
 ```python
 # A few random samples
@@ -248,8 +195,6 @@ print(samples_to_predict.shape)
 
 The output of the `print` statement: `(4, 28, 28, 1)`.
 
-Correct ✅ We indeed added 4 images of 28x28 pixels with one channel per image.
-
 The next step is to generate the predictions:
 
 ```python
@@ -275,12 +220,6 @@ The output here seems to be a bit jibberish at first:
   1.08795590e-03 1.78136176e-07]]
 ```
 
-Confused? 😕 Don't be!
-
-Remember that we used the [Softmax activation function](https://www.machinecurve.com/index.php/2020/01/08/how-does-the-softmax-activation-function-work/) when creating our model. This activation function doesn't compute _the prediction_, but rather a _discrete probability distribution over the target classes_. In simple English, this means that Softmax computes the probability that the input belongs to a particular class, for each class. The values in each row summate to 1 - or 100%, which is a characteristic of a valid probability distribution.
-
-Now, we can finalize our work by _actually_ finding out what our predicted classes are - by taking the `argmax` values (or "maximum argument", index of the maximum value) for each element in the list with predictions:
-
 ```python
 # Generate arg maxes for predictions
 classes = np.argmax(predictions, axis = 1)
@@ -297,8 +236,6 @@ This outputs `[6 8 0 6]`. Yeah! ✅ 🎉
     
 - [![](images/dig_1.png)](https://www.machinecurve.com/wp-content/uploads/2020/02/dig_1.png)
     
-
-_Note that the code above trains with and predicts with both the training data. While this is bad practice when evaluating a model, it is acceptable when you're confident that your model generalizes to new data. I indeed am that it will generalize to new MNIST-like data, and hence I didn't make the split here._
 
 ## Full code
 
@@ -404,27 +341,9 @@ print(classes)
 
 ## Summary
 
-In today's blog post, we looked at how to _generate predictions with a Keras model_. We did so by coding an example, which did a few things:
-
 - Load EMNIST digits from the [Extra Keras Datasets](https://www.machinecurve.com/index.php/2020/01/10/making-more-datasets-available-for-keras/) module.
 - Prepare the data.
 - Define and train a Convolutional Neural Network for classification.
 - Save the model.
 - Load the model.
 - Generate new predictions with the loaded model and validate that they are correct.
-
-I hope you've learnt something from today's post, even though it was a bit smaller than usual :) Please let me know in the comments section what you think 💬
-
-Thank you for reading MachineCurve today and happy engineering! 😎
-
-\[kerasbox\]
-
-* * *
-
-## References
-
-MachineCurve. (2020, January 10). Making more datasets available for Keras. Retrieved from [https://www.machinecurve.com/index.php/2020/01/10/making-more-datasets-available-for-keras/](https://www.machinecurve.com/index.php/2020/01/10/making-more-datasets-available-for-keras/)
-
-MachineCurve. (2020, February 11). How to use sparse categorical crossentropy in Keras? Retrieved from [https://www.machinecurve.com/index.php/2019/10/06/how-to-use-sparse-categorical-crossentropy-in-keras/](https://www.machinecurve.com/index.php/2019/10/06/how-to-use-sparse-categorical-crossentropy-in-keras/)
-
-Cohen, G., Afshar, S., Tapson, J., & van Schaik, A. (2017). EMNIST: an extension of MNIST to handwritten letters. Retrieved from [http://arxiv.org/abs/1702.05373](http://arxiv.org/abs/1702.05373)
